@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    environment:
+      - FLASK_APP=src/CanadianSolarHttpProxy.py
+      - FLASK_ENV=development
+      - IP_ADDRESS=192.168.0.40
+      - USERNAME=user
+      - PASSWORD=12345678
