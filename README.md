@@ -3,27 +3,29 @@ This project is a system that accesses the API server operating on CanadianSolar
 
 ## Item Description
 
-| No | Item Name  | Description                                                           |
+**Note:** The following parameter descriptions are based on analysis and reverse-engineering, as official documentation is not publicly available. They are not confirmed by the manufacturer.
+
+| No | Item Name  | Description (Unofficial)                                              |
 |----|------------|-----------------------------------------------------------------------|
 | 1  | ipaddress  | Address of the power detection unit (CSPDUE)                          |
-| 2  | 24080038   | Serial number??                                                       |
-| 3  | PC1f7eed87-b | Session ID?                                                          |
-| 4  | 20250206&20250206 | Start date and time to end date and time?                      |
-| 5  | Z02        | Request/response identifier? Sequence number                          |
-| 6  | V2HST      |                                                                       |
-| 7  | DST        |                                                                       |
-| 8  | IEVD       | Inverter related? Voltage                                             |
-| 9  | IEVC       | Inverter related? Current                                             |
-| 10 | IEVR       | Inverter related? Power                                               |
-| 11 | IG0        | Generated power [kW]                                                  |
-| 12 | IBE        | Purchased power [kW]                                                  |
-| 13 | ISE        | Sold power [kW]?                                                      |
-| 14 | ICE        | Consumed power [kW]                                                   |
-| 15 | TG0        | Total generated power [kWh]?                                          |
-| 16 | IDD        |                                                                       |
-| 17 | IDC        |                                                                       |
-| 18 | IDR        |                                                                       |
-| 19 | IGE        |                                                                       |
+| 2  | 24080038   | Serial number of the unit                                             |
+| 3  | PC1f7eed87-b | Session ID (may vary)                                                 |
+| 4  | 20250206&20250206 | Start and end date for the query (YYYYMMDD)                      |
+| 5  | Z02        | Request sequence number                                               |
+| 6  | V2HST      | History status (?)                                                    |
+| 7  | DST        | Daylight Saving Time setting                                          |
+| 8  | IEVD       | Inverter DC Voltage [V]                                               |
+| 9  | IEVC       | Inverter DC Current [A]                                               |
+| 10 | IEVR       | Inverter Power [W]                                                    |
+| 11 | IG0        | Instantaneous Generated Power [kW]                                    |
+| 12 | IBE        | Instantaneous Purchased Power [kW]                                    |
+| 13 | ISE        | Instantaneous Sold Power [kW]                                         |
+| 14 | ICE        | Instantaneous Consumed Power [kW]                                     |
+| 15 | TG0        | Total Generated Power [kWh]                                           |
+| 16 | IDD        | Unknown                                                               |
+| 17 | IDC        | Maximum DC Current [A] (?)                                            |
+| 18 | IDR        | Unknown                                                               |
+| 19 | IGE        | Unknown                                                               |
 
 ## API Endpoints
 
@@ -33,12 +35,14 @@ Retrieve power information from the CanadianSolar power unit.
 
 #### Query Parameters
 
-| Parameter       | Type   | Description                                                                 |
-|-----------------|--------|-----------------------------------------------------------------------------|
-| `startDate`     | string | (Optional) Start date in `YYYYMMDD` format. Defaults to current date.       |
-| `endDate`       | string | (Optional) End date in `YYYYMMDD` format. Defaults to current date.         |
-| `sequenceCounter` | int  | (Optional) Sequence counter. If not provided, an internal counter is used.  |
-| `getParams`     | string | (Optional) Parameters to retrieve. Defaults to `V2HST&DST&IEVD&IEVC&IEVR&IG0&IBE&ISE&ICE&TG0&IDD&IDC&IDR&IGE`. |
+| Parameter         | Type   | Required | Description                                                                   |
+|-------------------|--------|----------|-------------------------------------------------------------------------------|
+| `startDate`       | string | No       | Start date in `YYYYMMDD` format. If omitted, uses today's date automatically. |
+| `endDate`         | string | No       | End date in `YYYYMMDD` format. If omitted, uses today's date automatically.   |
+| `sequenceCounter` | int    | No       | Sequence counter (0-65535). If not provided, defaults to 0.                  |
+| `getParams`       | string | YES      | Parameters to retrieve. Defaults to `V2HST&DST&IEVD&IEVC&IEVR&IG0&IBE&ISE&ICE&TG0&IDD&IDC&IDR&IGE`. |
+
+**Note:** When both `startDate` and `endDate` are omitted, the API automatically retrieves data for the current date only.
 
 #### Response
 
