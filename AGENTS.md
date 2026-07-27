@@ -55,7 +55,9 @@ docker compose up --build
 
 ### 1. getParams は非標準クエリ形式（URL の最後に置く必要がある）
 
-インバータ API は `getParams=V2HST&DST&IEVD...` のように、**`&` 区切りの値の羅列**を 1 つのパラメータとして受け取る独自形式を使う。標準的なクエリパーサ（`request.args`）では `DST` 以降が別パラメータに分解されてしまうため、`get_query_params()` は**生のクエリ文字列を正規表現 `getParams=(.*)` で切り出す**実装になっている。
+**本プロキシの `/getinfo` エンドポイント**は `getParams=V2HST&DST&IEVD...` のように、**`&` を含む値の羅列**を 1 つのパラメータとして受け取る独自形式を使う。標準的なクエリパーサ（`request.args`）では `DST` 以降が別パラメータに分解されてしまうため、`get_query_params()` は**生のクエリ文字列を正規表現 `getParams=(.*)` で切り出す**実装になっている。
+
+なお、上流のインバータ API へ `getParams=` というキーが送られるわけではない。切り出した値は素の `&` 区切りトークン列として上流 URL の末尾にそのまま付加される（「罠 3」の URL 形式を参照）。
 
 この実装の帰結として:
 
@@ -83,8 +85,8 @@ http://{IP}/getinfo.cgi?{SERIAL}&{SESSION_ID}&{startDate}&{endDate}&Z{sequenceCo
 | --- | --- |
 | パラメータ検証エラー（`ValueError`） | 400 |
 | インバータからの空レスポンス / パース失敗 / その他ネットワークエラー | 502 |
-| インバータへの接続失敗（`ConnectionError`） | 503 |
-| タイムアウト（`Timeout`） | 504 |
+| インバータへの接続失敗（`ConnectionError`）。**接続タイムアウト（`ConnectTimeout`）もここに含まれる** — `ConnectTimeout` は `ConnectionError` と `Timeout` の両方を継承しており、実装は `ConnectionError` を先に捕捉するため | 503 |
+| `ConnectionError` に該当しないタイムアウト（`ReadTimeout` 等） | 504 |
 | インバータが非 200 を返した場合 | 上流のステータスをそのまま返す |
 
 ## ドキュメントと実装の既知の不一致
